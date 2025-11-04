@@ -54,7 +54,8 @@ router.post('/create-order', verifyToken, async (req, res) => {
       shippingAddress,
       totalAmount: amount,
       paymentDetails: {
-        razorpayOrderId: razorpayOrder.id
+        razorpayOrderId: razorpayOrder.id,
+        paymentMethod: req.body.paymentMethod || 'card' // Default to card if not specified
       }
     });
 
@@ -168,12 +169,28 @@ router.post('/create-upi-qrcode', verifyToken, async (req, res) => {
     }
 
     // Create order in DB with pending UPI payment
+    // Fetch user's cart and populate product details
+    const cart = await Cart.findOne({ userId: req.user.id }).populate('items.productId');
+    if (!cart || cart.items.length === 0) {
+      return res.status(400).json({ success: false, message: 'Cart is empty' });
+    }
+
+    // Build items array with product, quantity and price
+    const items = cart.items.map(i => ({
+      product: i.productId._id,
+      quantity: i.quantity,
+      price: i.productId.price || 0
+    }));
+
     const order = new Order({
       user: req.user.id,
-      items: [],
+      items,
       shippingAddress: shippingAddress || {},
       totalAmount: amount,
-      paymentDetails: { upi },
+      paymentDetails: { 
+        upi,
+        paymentMethod: 'upi'
+      },
       status: 'pending'
     });
     await order.save();

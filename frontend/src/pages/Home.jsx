@@ -46,7 +46,9 @@ const Home = ({ addToCart, addToWishlist }) => {
     fetchProducts();
   }, [category, search]);
 
-  const posters = [poster1, poster2, poster3];
+  const posters = ["https://res.cloudinary.com/dfhjtmvrz/image/upload/v1762187614/Poster1_clwk43.jpg", 
+    "https://res.cloudinary.com/dfhjtmvrz/image/upload/v1762188729/Gemini_Generated_Image_vhpg13vhpg13vhpg_npszly.png", 
+    "https://res.cloudinary.com/dfhjtmvrz/image/upload/v1762188613/lenses-solution_copy_f4vdgs.jpg"];
 
   const categories = [
     { icon: Eye, name: "Eyeglasses", image: fit2, link: "/category/Eyeglasses", color: "bg-blue-50" },

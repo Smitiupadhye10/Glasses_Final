@@ -1,4 +1,5 @@
 import Product from "../models/Product.js";
+import ContactLens from "../models/ContactLens.js";
 
 const HIERARCHICAL_KEYS = new Set([
   "Gender",
@@ -62,8 +63,19 @@ export const listProducts = async (req, res) => {
 
     const mongoFilter = andConditions.length > 0 ? { $and: andConditions } : {};
 
-    const products = await Product.find(mongoFilter);
-    res.json(products);
+    // Fetch matching products from both collections
+    const [products, contactLenses] = await Promise.all([
+      Product.find(mongoFilter),
+      ContactLens.find(mongoFilter),
+    ]);
+
+    // Combine and mark type for frontend if needed
+    const combined = [
+      ...products.map((p) => ({ ...p._doc, _type: "product" })),
+      ...contactLenses.map((c) => ({ ...c._doc, _type: "contactLens" })),
+    ];
+
+    res.json(combined);
   } catch (error) {
     res.json([]);
   }
@@ -71,9 +83,13 @@ export const listProducts = async (req, res) => {
 
 export const getProductById = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
-    if (!product) return res.status(404).json({ message: "Product not found" });
-    res.json(product);
+    let product = await Product.findById(req.params.id);
+    if (!product) {
+      product = await ContactLens.findById(req.params.id);
+      if (!product) return res.status(404).json({ message: "Product not found" });
+      return res.json({ ...product._doc, _type: "contactLens" });
+    }
+    res.json({ ...product._doc, _type: "product" });
   } catch (error) {
     res.status(500).json({ message: "Error fetching product", error });
   }

@@ -164,6 +164,26 @@ export const CartProvider = ({ children }) => {
     }
   };
 
+  // Save last ordered cart to localStorage after order
+  const saveLastOrderedCart = (cartItems) => {
+    localStorage.setItem('lastOrderedCart', JSON.stringify(cartItems));
+  };
+
+  // Call this after successful payment
+  const clearCart = () => {
+    saveLastOrderedCart(cart);
+    setCart([]);
+  };
+
+  // Expose last ordered cart for Cart page
+  const getLastOrderedCart = () => {
+    try {
+      return JSON.parse(localStorage.getItem('lastOrderedCart')) || [];
+    } catch {
+      return [];
+    }
+  };
+
   return (
     <CartContext.Provider
       value={{
@@ -175,6 +195,8 @@ export const CartProvider = ({ children }) => {
         removeFromCart,
         addToWishlist,
         removeFromWishlist,
+        clearCart,
+        getLastOrderedCart,
       }}
     >
       {children}

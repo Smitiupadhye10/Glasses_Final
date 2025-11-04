@@ -23,8 +23,10 @@ const ProductCard = ({ product }) => {
     product.price * (1 - (product.discount || 0) / 100)
   ).toFixed(0);
 
-  // Use first image from images array
-  const imageSrc = product.images?.[0] || "/placeholder.jpg";
+  // Use first image from images array (show only one image for contact lenses)
+  const imageSrc = Array.isArray(product.images) ? (product.images[0] || "/placeholder.jpg") : (product.images || "/placeholder.jpg");
+
+  const isContactLens = product._type === 'contactLens' || product.category === 'Contact Lenses';
 
   // Render stars for ratings
   const renderStars = (rating) => {
@@ -51,14 +53,44 @@ const ProductCard = ({ product }) => {
         onClick={() => navigate(`/product/${product._id}`)}
       />
 
-      {/* Title */}
-      <h2 className="text-lg font-semibold">{product.title}</h2>
+      {/* Title and meta */}
+      <h2 className="text-lg font-semibold leading-tight mb-1 truncate">{product.title}</h2>
 
-      {/* Ratings */}
-      <div className="mb-1">{renderStars(product.ratings)}</div>
+      {/* Meta for contact lenses */}
+      {isContactLens ? (
+        <div className="text-sm text-gray-600 space-y-1 mb-2">
+          {product.product_info?.brand && (
+            <div>Brand: <span className="font-medium text-gray-800">{product.product_info.brand}</span></div>
+          )}
+          {product.product_info?.usageDuration && (
+            <div>Usage: <span className="font-medium text-gray-800">{product.product_info.usageDuration}</span></div>
+          )}
+          {product.product_info?.color && (
+            <div>Color: <span className="font-medium text-gray-800">{product.product_info.color}</span></div>
+          )}
+          <div className="flex gap-2 mt-1">
+            {product.product_info?.baseCurve && (
+              <span className="px-2 py-0.5 text-xs bg-gray-100 rounded">BC {product.product_info.baseCurve}</span>
+            )}
+            {product.product_info?.diameter && (
+              <span className="px-2 py-0.5 text-xs bg-gray-100 rounded">DIA {product.product_info.diameter}</span>
+            )}
+            {product.product_info?.packaging && (
+              <span className="px-2 py-0.5 text-xs bg-gray-100 rounded">{product.product_info.packaging}</span>
+            )}
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* Ratings */}
+          <div className="mb-1">{renderStars(product.ratings)}</div>
+          {/* Category */}
+          <p className="text-gray-400 text-sm mb-2 capitalize">{product.category}</p>
+        </>
+      )}
 
-      {/* Price and Discount */}
-      <div className="flex items-center gap-2 mb-2">
+      {/* Price and Discount (always visible) */}
+      <div className="flex items-center gap-2 mb-3">
         <span className="text-indigo-600 font-bold text-lg">₹{discountedPrice}</span>
         {product.discount > 0 && (
           <>
@@ -68,21 +100,20 @@ const ProductCard = ({ product }) => {
         )}
       </div>
 
-      {/* Category */}
-      <p className="text-gray-400 text-sm mb-3 capitalize">{product.category}</p>
-
       {/* Buttons */}
-      <div className="flex flex-col sm:flex-row gap-2 mt-auto">
+      <div className="flex gap-2 mt-auto">
         <button
           onClick={() => addToCart(product)}
-          className="flex-1 bg-indigo-600 text-white py-2 rounded-xl shadow hover:bg-indigo-700 transition"
+          className="flex-1 bg-gray-800 text-white px-6 py-3 rounded-xl font-semibold hover:bg-gray-700 transition-colors shadow-md flex items-center justify-center gap-2"
         >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 8m5-8v8m4-8v8m4-8l2 8"/></svg>
           Add to Cart
         </button>
         <button
           onClick={handleBuyNow}
-          className="flex-1 bg-green-600 text-white py-2 rounded-xl shadow hover:bg-green-700 transition"
+          className="flex-1 bg-gray-800 text-white px-6 py-3 rounded-xl font-semibold hover:bg-gray-700 transition-colors shadow-md flex items-center justify-center gap-2"
         >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h4l3 8 4-16 3 8h4"/></svg>
           Buy Now
         </button>
       </div>

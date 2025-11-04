@@ -11,11 +11,29 @@ const PAYMENT_METHODS = {
     icon: '💳',
     description: 'Pay securely with your credit or debit card'
   },
+  NETBANKING: {
+    id: 'netbanking',
+    name: 'Net Banking',
+    icon: '🏦',
+    description: 'Pay using your bank account'
+  },
   UPI: {
     id: 'upi',
     name: 'UPI / QR Code',
     icon: '📱',
     description: 'Pay using any UPI app (Google Pay, PhonePe, Paytm, etc.)'
+  },
+  WALLET: {
+    id: 'wallet',
+    name: 'Mobile Wallet',
+    icon: '👝',
+    description: 'Pay using Paytm, PhonePe, Amazon Pay etc.'
+  },
+  EMI: {
+    id: 'emi',
+    name: 'EMI',
+    icon: '📅',
+    description: 'Pay in easy monthly installments'
   }
 };
 
@@ -140,11 +158,16 @@ const CheckoutPage = () => {
     }, 300000);
   };
 
-  const handleCardPayment = async () => {
+  const handlePayment = async () => {
     setLoading(true);
     setError(null);
 
     try {
+      // Handle UPI QR code payment separately
+      if (paymentMethod === 'upi') {
+        return handleUPIPayment();
+      }
+
       // Load Razorpay SDK
       const res = await loadRazorpay();
       if (!res) {
@@ -161,7 +184,8 @@ const CheckoutPage = () => {
         },
         body: JSON.stringify({
           amount: total,
-          shippingAddress: address
+          shippingAddress: address,
+          paymentMethod
         })
       });
 
@@ -181,6 +205,51 @@ const CheckoutPage = () => {
           name: user.name,
           email: user.email,
           contact: address.phone
+        },
+        config: {
+          display: {
+            blocks: {
+              utib: { //name for Axis block
+                name: "Pay using Axis Bank",
+                instruments: [
+                  {
+                    method: "card",
+                    issuers: ["UTIB"]
+                  },
+                  {
+                    method: "netbanking",
+                    banks: ["UTIB"]
+                  },
+                ]
+              },
+              other: { //  name for other block
+                name: "Other Payment Methods",
+                instruments: [
+                  {
+                    method: "card",
+                    issuers: ["ICIC"]
+                  },
+                  {
+                    method: "netbanking",
+                  },
+                  {
+                    method: "wallet"
+                  },
+                  {
+                    method: "upi"
+                  },
+                  {
+                    method: "emi"
+                  }
+                ]
+              }
+            },
+            hide: [],
+            sequence: ["block.utib", "block.other"],
+            preferences: {
+              show_default_blocks: false
+            }
+          }
         },
         handler: async function(response) {
           try {
@@ -409,7 +478,7 @@ const CheckoutPage = () => {
                   ← Back to Shipping
                 </button>
                 <button
-                  onClick={paymentMethod === 'upi' ? handleUPIPayment : handleCardPayment}
+                  onClick={handlePayment}
                   disabled={!paymentMethod || loading}
                   className={`px-8 py-3 rounded bg-indigo-600 text-white font-semibold hover:bg-indigo-700 transition ${
                     (!paymentMethod || loading) ? 'opacity-50 cursor-not-allowed' : ''

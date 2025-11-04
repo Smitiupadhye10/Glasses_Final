@@ -10,6 +10,8 @@ import uploadRoutes from "./routes/uploadRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
 import wishlistRoutes from "./routes/wishlistRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
+import contactLensRoutes from "./routes/contactLensRoutes.js";
+import allProductsRoutes from "./routes/allProductsRoutes.js";
 
 // Initialize express app
 const app = express();
@@ -53,6 +55,8 @@ app.use("/api", uploadRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/payment", paymentRoutes);
+app.use("/api/contact-lenses", contactLensRoutes);
+app.use("/api/all-products", allProductsRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
