@@ -12,19 +12,13 @@ router.post("/signup", async (req, res) => {
     const { firstName, lastName, phone, email, password, name } = req.body;
     const existingUser = await User.findOne({ email });
     if (existingUser) return res.status(400).json({ message: "User already exists" });
-
-    const hashedPassword = await bcrypt.hash(password, 10);
     const computedName = name || [firstName, lastName].filter(Boolean).join(" ");
 
     const user = new User({
-      firstName: firstName || undefined,
-      lastName: lastName || undefined,
       phone: phone || undefined,
       name: computedName || undefined,
       email,
-      password: hashedPassword,
-      cart: [],
-      wishlist: []
+      password
     });
 
     await user.save();
@@ -50,9 +44,7 @@ router.post("/signup", async (req, res) => {
 router.post("/signin", async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ email })
-      .populate('cart.productId')
-      .populate('wishlist');
+    const user = await User.findOne({ email });
 
     if (!user) return res.status(400).json({ message: "User not found" });
 
@@ -71,9 +63,7 @@ router.post("/signin", async (req, res) => {
         id: user._id,
         name: displayName,
         email: user.email,
-        isAdmin: user.isAdmin || false,
-        cart: user.cart,
-        wishlist: user.wishlist
+        isAdmin: user.isAdmin || false
       }
     });
   } catch (error) {
@@ -85,9 +75,7 @@ router.post("/signin", async (req, res) => {
 router.get("/me", verifyToken, async (req, res) => {
   try {
     const user = await User.findById(req.user.id)
-      .select("name email firstName lastName cart wishlist isAdmin")
-      .populate('cart.productId')
-      .populate('wishlist');
+      .select("name email firstName lastName isAdmin");
 
     if (!user) return res.status(404).json({ message: "User not found" });
 
@@ -97,9 +85,7 @@ router.get("/me", verifyToken, async (req, res) => {
       id: user._id,
       name: displayName,
       email: user.email,
-      isAdmin: user.isAdmin || false,
-      cart: user.cart,
-      wishlist: user.wishlist
+      isAdmin: user.isAdmin || false
     });
   } catch (error) {
     res.status(500).json({ message: "Error fetching user", error });

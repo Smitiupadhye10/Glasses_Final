@@ -45,7 +45,7 @@ export const UserProvider = ({ children }) => {
   // 🔹 Login function
   const login = async (email, password) => {
     try {
-      const { data } = await api.post("/users/login", { email, password });
+      const { data } = await api.post("/auth/signin", { email, password });
       if (!data.token) throw new Error("No token received");
 
       localStorage.setItem("token", data.token);
