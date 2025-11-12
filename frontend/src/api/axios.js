@@ -1,10 +1,11 @@
+
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { logout } from '../utils/auth';
 
 // Create axios instance with base URL from environment variables
 const api = axios.create({
-  baseURL: `${import.meta.env.VITE_API_BASE_URL}/api`,
+  baseURL: import.meta.env.VITE_API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -39,7 +40,6 @@ api.interceptors.response.use(
         case 401:
           // Auto logout if 401 Unauthorized response returned from API
           logout();
-          window.location.href = '/login';
           errorMessage = 'Your session has expired. Please log in again.';
           break;
         case 403:
