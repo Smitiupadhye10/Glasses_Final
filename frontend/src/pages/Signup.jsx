@@ -31,6 +31,7 @@ const Signup = () => {
         email: email.trim().toLowerCase(),
         password,
       });
+
       if (!data?.token) {
         throw new Error("Signup failed");
       }
