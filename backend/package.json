@@ -2,7 +2,7 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "Backend server for LensLogic glasses store",
-  "main": "server/index.js",
+  "main": "index.js",
   "type": "module",
   "engines": {
     "node": ">=16.0.0"

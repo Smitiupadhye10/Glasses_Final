@@ -4,59 +4,29 @@ import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import { verifyToken } from "../middleware/authMiddleware.js";
 
+console.log('🔐 Loading auth routes...');
 const authRouter = express.Router();
-
-// Signup
-authRouter.post("/signup", async (req, res) => {
-  try {
-    const { firstName, lastName, phone, email, password, name } = req.body;
-    const existingUser = await User.findOne({ email });
-    if (existingUser) return res.status(400).json({ message: "User already exists" });
-    const computedName = name || [firstName, lastName].filter(Boolean).join(" ");
-
-    const user = new User({
-      phone: phone || undefined,
-      name: computedName || undefined,
-      email,
-      password
-    });
-
-    await user.save();
-
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
-    });
-
-    res.status(201).json({ 
-      token,
-      user: {
-        id: user._id,
-        name: computedName,
-        email: user.email
-      }
-    });
-  } catch (error) {
-    res.status(500).json({ message: "Error creating user", error });
-  }
-});
+console.log('✅ Auth router created');
 
 // Signin
 authRouter.post("/signin", async (req, res) => {
+  console.log('🔑 Signin request received:', req.body);
+  console.log('📝 Request headers:', req.headers);
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
-
-    if (!user) return res.status(400).json({ message: "User not found" });
-
+    if (!user) {
+      console.log('❌ User not found:', email);
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
-
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
-    });
-
-    const displayName = user.name || [user.firstName, user.lastName].filter(Boolean).join(" ");
-
+    if (!isMatch) {
+      console.log('❌ Password mismatch for:', email);
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || "fallback_secret", { expiresIn: "1h" });
+    const displayName = user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.name || user.email;
+    console.log('✅ Signin successful for:', email);
     res.json({
       token,
       user: {
@@ -67,20 +37,58 @@ authRouter.post("/signin", async (req, res) => {
       }
     });
   } catch (error) {
+    console.error('❌ Signin error:', error);
     res.status(500).json({ message: "Error logging in", error });
   }
 });
 
-// Get current user info
-authRouter.get("/me",  async (req, res) => {
+// Signup
+authRouter.post("/signup", async (req, res) => {
+  console.log('👤 Signup request received:', req.body);
+  console.log('📝 Request headers:', req.headers);
+  try {
+    const { email, password, firstName, lastName, name } = req.body;
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      console.log('❌ User already exists:', email);
+      return res.status(400).json({ message: "User already exists" });
+    }
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = new User({
+      email,
+      password: hashedPassword,
+      firstName: firstName || name,
+      lastName: lastName || "",
+      name: firstName && lastName ? `${firstName} ${lastName}` : name || email
+    });
+    await newUser.save();
+    const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET || "fallback_secret", { expiresIn: "1h" });
+    const displayName = newUser.firstName && newUser.lastName ? `${newUser.firstName} ${newUser.lastName}` : newUser.name || newUser.email;
+    console.log('✅ Signup successful for:', email);
+    res.status(201).json({
+      token,
+      user: {
+        id: newUser._id,
+        name: displayName,
+        email: newUser.email,
+        isAdmin: newUser.isAdmin || false
+      }
+    });
+  } catch (error) {
+    console.error('❌ Signup error:', error);
+    res.status(500).json({ message: "Error signing up", error });
+  }
+});
+
+// Get current user
+authRouter.get("/me", verifyToken, async (req, res) => {
   try {
     const user = await User.findById(req.user.id)
       .select("name email firstName lastName isAdmin");
-
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    const displayName = user.name || [user.firstName, user.lastName].filter(Boolean).join(" ");
-    
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const displayName = user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.name || user.email;
     res.json({
       id: user._id,
       name: displayName,
@@ -91,4 +99,16 @@ authRouter.get("/me",  async (req, res) => {
     res.status(500).json({ message: "Error fetching user", error });
   }
 });
+
+// Debug endpoint
+authRouter.get("/debug", (req, res) => {
+  console.log('🔍 Auth debug route hit!');
+  res.json({
+    message: "Auth debug working!",
+    routes: ["/api/signin (POST)", "/api/signup (POST)", "/api/me (GET)", "/api/debug (GET)"],
+    timestamp: new Date()
+  });
+});
+
+console.log('📤 Exporting authRouter with', authRouter.stack?.length || 0, 'routes');
 export default authRouter;

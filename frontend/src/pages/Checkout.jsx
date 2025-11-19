@@ -2,6 +2,7 @@ import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CartContext } from '../context/CartContext';
 import { useUser } from '../context/UserContext';
+import api from '../api/axios';
 
 // Payment method icons
 const PAYMENT_METHODS = {
@@ -101,23 +102,15 @@ const CheckoutPage = () => {
     setError(null);
 
     try {
-      const response = await fetch('http://localhost:4000/api/payment/create-upi-qrcode', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({
-          amount: total,
-          shippingAddress: address
-        })
+      const response = await api.post('/payment/create-upi-qrcode', {
+        amount: total,
+        shippingAddress: address
       });
-
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message);
+      const data = response.data;
+      if (response.status !== 200) throw new Error(data.message || 'Request failed');
 
       setQrCode(data.qrDataUrl);
-      setUpiId(data.upiId);
+      setUpiId(data.upiLink);
       setOrderId(data.orderId);
       
       // Start polling for payment status
@@ -132,16 +125,11 @@ const CheckoutPage = () => {
     setCheckingPayment(true);
     const checkInterval = setInterval(async () => {
       try {
-        const response = await fetch('http://localhost:4000/api/payment/confirm-upi-payment', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          },
-          body: JSON.stringify({ orderId })
+        const response = await api.post('/payment/confirm-upi-payment', {
+          orderId
         });
 
-        const data = await response.json();
+        const data = response.data;
         if (response.ok && data.success) {
           clearInterval(checkInterval);
           setCheckingPayment(false);
@@ -180,21 +168,14 @@ const CheckoutPage = () => {
       }
 
       // Create order
-      const response = await fetch('http://localhost:4000/api/payment/create-order', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({
-          amount: total,
-          shippingAddress: address,
-          paymentMethod
-        })
+      const response = await api.post('/payment/create-order', {
+        amount: total,
+        shippingAddress: address,
+        paymentMethod
       });
 
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message);
+      const data = response.data;
+      if (response.status !== 200) throw new Error(data.message || 'Request failed');
 
       // Configure Razorpay options
       const options = {
@@ -265,22 +246,15 @@ const CheckoutPage = () => {
         handler: async function(response) {
           try {
             // Verify payment
-            const verifyRes = await fetch('http://localhost:4000/api/payment/verify-payment', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-              },
-              body: JSON.stringify({
-                orderId: data.orderId,
-                razorpayOrderId: response.razorpay_order_id,
-                razorpayPaymentId: response.razorpay_payment_id,
-                razorpaySignature: response.razorpay_signature
-              })
+            const verifyRes = await api.post('/payment/verify-payment', {
+              orderId: data.orderId,
+              razorpayOrderId: response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySignature: response.razorpay_signature
             });
 
-            const verifyData = await verifyRes.json();
-            if (!verifyRes.ok) throw new Error(verifyData.message);
+            const verifyData = verifyRes.data;
+            if (verifyRes.status !== 200) throw new Error(verifyData.message || 'Verification failed');
 
             // Clear cart and navigate to orders
             clearCart();

@@ -15,14 +15,14 @@ const AdminLayout = () => {
         return;
       }
       try {
-        const res = await fetch("http://localhost:4000/api/auth/me", {
+        const api = await import("../api/axios.js");
+        const res = await api.default.get("/auth/me", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-        if (res.ok) {
-          const userData = await res.json();
-          if (userData.isAdmin) {
+        if (res.data) {
+          if (res.data.isAdmin) {
             setIsAdmin(true);
           } else {
             alert("Admin access required");

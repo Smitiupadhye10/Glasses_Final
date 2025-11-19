@@ -20,7 +20,7 @@ export const UserProvider = ({ children }) => {
         }
 
         api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-        const { data } = await api.get("/users/me");
+        const { data } = await api.get("/auth/me");
 
         const userData = {
           id: data._id,
@@ -44,33 +44,31 @@ export const UserProvider = ({ children }) => {
 
   // 🔹 Login function
   const login = async (email, password) => {
-    try {
-      const { data } = await api.post("/auth/signin", { email, password });
-      if (!data.token) throw new Error("No token received");
+  try {
+    const res = await api.post("/auth/signin", { email, password });
+    console.log("LOGIN RESPONSE:", res.data);
 
-      localStorage.setItem("token", data.token);
-      api.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
-
-      const { data: profile } = await api.get("/users/me");
-
-      const userObj = {
-        id: profile._id,
-        name: profile.name,
-        email: profile.email,
-        phone: profile.phone,
-        isAdmin: profile.isAdmin || false,
-      };
-
-      setUser(userObj);
-      return { success: true, user: userObj };
-    } catch (err) {
-      console.error("❌ Login failed:", err);
-      return {
-        success: false,
-        error: err.response?.data?.message || err.message,
-      };
+    if (res.data?.token) {
+      localStorage.setItem("token", res.data.token);
+      api.defaults.headers.common["Authorization"] = `Bearer ${res.data.token}`;
+      setUser(res.data.user);
+      return { success: true };
     }
-  };
+
+    return { success: false, error: "Login failed" };
+  } catch (err) {
+    console.log("LOGIN ERROR:", err?.response || err);
+    console.log("ERROR STATUS:", err?.response?.status);
+    console.log("ERROR DATA:", err?.response?.data);
+    console.log("REQUEST URL:", err?.config?.baseURL + err?.config?.url);
+
+    return {
+      success: false,
+      error: err?.response?.data?.message || err.message || "Something went wrong",
+    };
+  }
+};
+
 
   // 🔹 Logout function
   const logout = () => {

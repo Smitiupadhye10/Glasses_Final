@@ -1,11 +1,12 @@
 import express from 'express';
 import Wishlist from '../models/Wishlist.js';
 import Product from '../models/Product.js';
+import { verifyToken } from '../middleware/authMiddleware.js';
 
 const wishlistRouter = express.Router();
 
 // GET /api/wishlist -> return product details in wishlist
-wishlistRouter.get('/',   async (req, res) => {
+wishlistRouter.get('/', verifyToken, async (req, res) => {
   try {
     let wishlist = await Wishlist.findOne({ userId: req.user.id }).populate('products');
     if (!wishlist) {
@@ -18,7 +19,7 @@ wishlistRouter.get('/',   async (req, res) => {
 });
 
 // POST /api/wishlist/add -> add productId
-wishlistRouter.post('/add',   async (req, res) => {
+wishlistRouter.post('/add', verifyToken, async (req, res) => {
   try {
     const { productId } = req.body;
     const product = await Product.findById(productId);
@@ -42,7 +43,7 @@ wishlistRouter.post('/add',   async (req, res) => {
 });
 
 // DELETE /api/wishlist/remove/:productId
-wishlistRouter.delete('/remove/:productId',   async (req, res) => {
+wishlistRouter.delete('/remove/:productId', verifyToken, async (req, res) => {
   try {
     const { productId } = req.params;
     let wishlist = await Wishlist.findOne({ userId: req.user.id });

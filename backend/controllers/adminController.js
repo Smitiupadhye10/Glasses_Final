@@ -80,17 +80,40 @@ export const deleteProduct = async (req, res) => {
 
 export const listOrders = async (req, res) => {
   try {
+    console.log('🔍 listOrders called');
     const { status } = req.query;
     const filter = {};
     if (status) filter.status = status;
 
-    const orders = await Order.find(filter)
-      .populate("userId", "name email")
-      .populate("items.productId")
-      .sort({ createdAt: -1 });
-
-    res.json(orders);
+    console.log('🔍 Filter:', filter);
+    console.log('🔍 Order model exists:', !!Order);
+    
+    // First try without populate to see if basic query works
+    console.log('🔍 Trying basic Order.find...');
+    const orders = await Order.find(filter).sort({ createdAt: -1 });
+    console.log('📊 Orders found (no populate):', orders.length);
+    
+    // If we have orders, try to populate them
+    if (orders.length > 0) {
+      try {
+        console.log('🔍 Trying to populate...');
+        const populatedOrders = await Order.find(filter)
+          .populate("userId", "name email")
+          .populate("items.productId")
+          .sort({ createdAt: -1 });
+        console.log('📊 Populated orders:', populatedOrders.length);
+        res.json(populatedOrders);
+      } catch (populateError) {
+        console.error('❌ Populate error:', populateError);
+        // Return orders without populate if populate fails
+        res.json(orders);
+      }
+    } else {
+      res.json(orders);
+    }
   } catch (error) {
+    console.error('❌ Error in listOrders:', error);
+    console.error('❌ Error stack:', error.stack);
     res.status(500).json({ message: "Error fetching orders", error: error.message });
   }
 };

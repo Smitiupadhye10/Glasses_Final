@@ -32,12 +32,13 @@ const AdminDashboard = () => {
     setLoading(true);
     try {
       // ✅ Fetch ALL products from admin endpoint (no pagination)
-      const productsRes = await fetch("http://localhost:4000/api/admin/products", {
+      const api = await import("../api/axios.js");
+      const productsRes = await api.default.get("/admin/products", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      const productData = await productsRes.json();
+      const productData = productsRes.data;
 
       const productsArray = Array.isArray(productData)
         ? productData
@@ -51,12 +52,8 @@ const AdminDashboard = () => {
       );
 
       // ✅ Fetch all orders
-      const ordersRes = await fetch("http://localhost:4000/api/admin/orders", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const orderData = await ordersRes.json();
+      const ordersRes = await api.default.get("/admin/orders");
+      const orderData = ordersRes.data;
 
       const ordersArray = Array.isArray(orderData)
         ? orderData

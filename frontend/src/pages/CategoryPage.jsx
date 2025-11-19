@@ -41,7 +41,9 @@ export default function CategoryPage({ addToCart, addToWishlist }) {
     params.set("page", String(page));
     params.set("limit", String(limit));
 
-    const url = `http://localhost:4000/api/products?${params.toString()}`;
+    const url = `${import.meta.env.VITE_API_BASE_URL}/products?${params.toString()}`;
+
+
 
     const fadeTimeout = setTimeout(() => {
       fetch(url)
@@ -62,7 +64,8 @@ export default function CategoryPage({ addToCart, addToWishlist }) {
     if (category) facetParams.set("category", category);
     facetParams.delete("page");
     facetParams.delete("limit");
-    fetch(`http://localhost:4000/api/products/facets?${facetParams.toString()}`)
+    fetch(`${import.meta.env.VITE_API_BASE_URL}/products/facets?${facetParams.toString()}`)
+
       .then((r) => r.json())
       .then((f) => setFacets({
         priceBuckets: f?.priceBuckets || {},

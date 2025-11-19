@@ -164,7 +164,7 @@ const AdminOrders = () => {
                     </span>
                     <select
                       value={order.status}
-                      onChange={(e) => handleOrderStatusUpdate(order._id, e.target.value)}
+                      onChange={(e) => updateOrderStatus(order._id, e.target.value)}
                       className="px-4 py-2 border-2 border-gray-300 rounded-lg text-sm font-medium focus:outline-none focus:border-blue-500 transition-all"
                     >
                       <option value="pending">Pending</option>

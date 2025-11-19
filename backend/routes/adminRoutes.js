@@ -1,19 +1,30 @@
 import express from "express";
 import { adminAuth } from "../middleware/adminMiddleware.js";
-import { listAllProducts, updateProduct, deleteProduct, listOrders, updateOrderStatus } from "../controllers/adminController.js";
+import { 
+    listAllProducts, 
+    updateProduct, 
+    deleteProduct, 
+    listOrders, 
+    updateOrderStatus 
+} from "../controllers/adminController.js";
 import { createProduct } from "../controllers/productController.js";
 
-const adminRouter = express.Router();
+const router = express.Router();
+
+// Test endpoint
+router.get("/test", (req, res) => {
+  console.log('🧪 Admin test endpoint called');
+  res.json({ message: "Admin routes are working!", timestamp: new Date() });
+});
 
 // Product management (admin only)
-adminRouter.get("/products" , listAllProducts);
-adminRouter.post("/products",   createProduct);
-adminRouter.put("/products/:id",   updateProduct);
-adminRouter.delete("/products/:id",   deleteProduct);
+router.get("/products", adminAuth, listAllProducts);
+router.post("/products", adminAuth, createProduct);
+router.put("/products/:id", adminAuth, updateProduct);
+router.delete("/products/:id", adminAuth, deleteProduct);
 
 // Order management (admin only)
-adminRouter.get("/orders",   listOrders);
-adminRouter.put("/orders/:id/status",   updateOrderStatus);
+router.get("/orders", adminAuth, listOrders);
+router.put("/orders/:id/status", adminAuth, updateOrderStatus);
 
-export default adminRouter;
-
+export default router;

@@ -16,12 +16,16 @@ const Signin = () => {
     e.preventDefault();
     setError("");
     setLoading(true);
+
     const result = await login(email.trim().toLowerCase(), password);
+
     if (result?.success) {
-      navigate("/home", { replace: true });
+      // ✅ FIXED ONLY THIS LINE
+      navigate("/", { replace: true });
     } else {
       setError(result?.error || "Invalid email or password. Please try again.");
     }
+
     setLoading(false);
   };
 
@@ -158,9 +162,9 @@ const Signin = () => {
 
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-600">
-                Don't have an account?{' '}
-                <Link 
-                  to="/signup" 
+                Don't have an account?{" "}
+                <Link
+                  to="/signup"
                   className="font-medium text-blue-600 hover:text-blue-700 hover:underline"
                 >
                   Create account
