@@ -12,7 +12,7 @@ const Cart = () => {
   const total = showCart.reduce((sum, p) => sum + p.price * p.quantity, 0);
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="px-4 sm:px-6 py-6 max-w-4xl mx-auto">
       <h1 className="text-2xl font-semibold mb-4">Your Cart</h1>
       {showCart.length === 0 && <p>Your cart is empty.</p>}
       {isLastOrder && <p className="text-green-600 mb-2">These are the products from your last order.</p>}
@@ -26,7 +26,7 @@ const Cart = () => {
           <img
             src={item.images?.[0] || item.Images?.image1 || "/placeholder.jpg"}
             alt={item.title}
-            className="w-24 h-20 object-contain rounded bg-gray-100 border mr-4"
+            className="w-20 h-20 sm:w-24 sm:h-24 object-contain rounded bg-gray-100 border mr-0 md:mr-4"
           />
           <div className="flex-1 min-w-0">
             <h2 className="text-lg font-medium truncate">{item.title}</h2>

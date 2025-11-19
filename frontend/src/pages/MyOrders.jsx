@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useUser } from '../context/UserContext';
+import api from '../api/axios';
 import { Package, Calendar, MapPin, Phone, Filter, Search, ArrowRight, Truck, CheckCircle, Clock, XCircle, RefreshCw, Eye } from 'lucide-react';
 
 const MyOrders = () => {
@@ -14,16 +15,10 @@ const MyOrders = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const response = await fetch('http://localhost:4000/api/payment/my-orders', {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        });
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.message);
-        setOrders(data.orders);
+        const { data } = await api.get('/payment/my-orders');
+        setOrders(data.orders || []);
       } catch (err) {
-        setError(err.message);
+        setError(err?.response?.data?.message || err.message || 'Failed to load orders');
       } finally {
         setLoading(false);
       }
@@ -160,7 +155,7 @@ const MyOrders = () => {
                 />
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               <select
                 className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
                 value={statusFilter}

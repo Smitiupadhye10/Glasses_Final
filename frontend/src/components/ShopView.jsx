@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import ProductCard from "./ProductCard"; // Adjust the path if needed
+import api from "../api/axios";
 
 const categories = [
   "Eyeglasses",
@@ -17,12 +18,8 @@ export default function ShopView({ addToCart, addToWishlist }) {
   useEffect(() => {
     setLoading(true);
     setError(null);
-    fetch("http://localhost:4000/api/products")
-      .then((res) => {
-        if (!res.ok) throw new Error(`API error: ${res.status}`);
-        return res.json();
-      })
-      .then((data) => setProducts(data))
+    api.get('/products')
+      .then(({ data }) => setProducts(Array.isArray(data) ? data : data.products || []))
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, []);
@@ -42,7 +39,7 @@ export default function ShopView({ addToCart, addToWishlist }) {
   return (
     <div>
       {/* Category Filter Bar */}
-      <div className="flex gap-4 mb-6">
+      <div className="flex flex-wrap gap-2 sm:gap-4 mb-6">
         {categories.map((cat) => (
           <button
             key={cat}
@@ -59,7 +56,7 @@ export default function ShopView({ addToCart, addToWishlist }) {
       </div>
 
       {/* Product Grid */}
-      <div className="p-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      <div className="p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
         {filteredProducts.length > 0 ? (
           filteredProducts.map((product) => (
             <ProductCard

@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { useUser } from './UserContext';
+import api from "../api/axios";
 
 export const CartContext = createContext();
 
@@ -32,16 +33,8 @@ export const CartProvider = ({ children }) => {
 
   const fetchCart = async () => {
     try {
-      const response = await fetch('http://localhost:4000/api/cart', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        // backend returns { items: [...] }
-        setCart(data.items || []);
-      }
+      const { data } = await api.get('/cart');
+      setCart(data.items || []);
     } catch (error) {
       console.error('Error fetching cart:', error);
     } finally {
@@ -51,16 +44,8 @@ export const CartProvider = ({ children }) => {
 
   const fetchWishlist = async () => {
     try {
-      const response = await fetch('http://localhost:4000/api/wishlist', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        // backend returns { wishlist: [...] }
-        setWishlist(data.wishlist || []);
-      }
+      const { data } = await api.get('/wishlist');
+      setWishlist(data.wishlist || []);
     } catch (error) {
       console.error('Error fetching wishlist:', error);
     }
@@ -74,27 +59,13 @@ export const CartProvider = ({ children }) => {
     }
 
     try {
-      const response = await fetch('http://localhost:4000/api/cart/add', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ productId: product._id })
-      });
-
-      if (response.ok) {
-        await fetchCart();
-        setToast({ type: 'success', message: 'Added to cart' });
-        setTimeout(() => setToast(null), 2000);
-      } else {
-        const err = await response.json().catch(() => ({}));
-        setToast({ type: 'error', message: err?.message || 'Failed to add to cart' });
-        setTimeout(() => setToast(null), 2500);
-      }
+      await api.post('/cart/add', { productId: product._id });
+      await fetchCart();
+      setToast({ type: 'success', message: 'Added to cart' });
+      setTimeout(() => setToast(null), 2000);
     } catch (error) {
-      console.error('Error adding to cart:', error);
-      setToast({ type: 'error', message: 'Error adding to cart' });
+      const msg = error?.response?.data?.message || 'Failed to add to cart';
+      setToast({ type: 'error', message: msg });
       setTimeout(() => setToast(null), 2500);
     }
   };
@@ -103,18 +74,8 @@ export const CartProvider = ({ children }) => {
     if (!user) return;
 
     try {
-      const response = await fetch('http://localhost:4000/api/cart/decrease', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ productId })
-      });
-
-      if (response.ok) {
-        await fetchCart();
-      }
+      await api.post('/cart/decrease', { productId });
+      await fetchCart();
     } catch (error) {
       console.error('Error decreasing quantity:', error);
     }
@@ -124,16 +85,8 @@ export const CartProvider = ({ children }) => {
     if (!user) return;
 
     try {
-      const response = await fetch(`http://localhost:4000/api/cart/remove/${productId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-
-      if (response.ok) {
-        await fetchCart();
-      }
+      await api.delete(`/cart/remove/${productId}`);
+      await fetchCart();
     } catch (error) {
       console.error('Error removing from cart:', error);
     }
@@ -146,27 +99,13 @@ export const CartProvider = ({ children }) => {
     }
 
     try {
-      const response = await fetch('http://localhost:4000/api/wishlist/add', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ productId: product._id })
-      });
-
-      if (response.ok) {
-        await fetchWishlist();
-        setToast({ type: 'success', message: 'Added to wishlist' });
-        setTimeout(() => setToast(null), 2000);
-      } else {
-        const err = await response.json().catch(() => ({}));
-        setToast({ type: 'error', message: err?.message || 'Failed to add to wishlist' });
-        setTimeout(() => setToast(null), 2500);
-      }
+      await api.post('/wishlist/add', { productId: product._id });
+      await fetchWishlist();
+      setToast({ type: 'success', message: 'Added to wishlist' });
+      setTimeout(() => setToast(null), 2000);
     } catch (error) {
-      console.error('Error adding to wishlist:', error);
-      setToast({ type: 'error', message: 'Error adding to wishlist' });
+      const msg = error?.response?.data?.message || 'Failed to add to wishlist';
+      setToast({ type: 'error', message: msg });
       setTimeout(() => setToast(null), 2500);
     }
   };
@@ -175,16 +114,8 @@ export const CartProvider = ({ children }) => {
     if (!user) return;
 
     try {
-      const response = await fetch(`http://localhost:4000/api/wishlist/remove/${productId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-
-      if (response.ok) {
-        await fetchWishlist();
-      }
+      await api.delete(`/wishlist/remove/${productId}`);
+      await fetchWishlist();
     } catch (error) {
       console.error('Error removing from wishlist:', error);
     }

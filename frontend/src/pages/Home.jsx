@@ -2,6 +2,7 @@ import Slider from "react-slick";
 import lens1 from "../assets/images/contact.png";
 import lens2 from "../assets/images/solution.jpeg";
 import { useEffect, useState } from "react";
+import api from "../api/axios";
 import { useSearchParams, Link } from "react-router-dom";
 import ProductCard from "../components/ProductCard.jsx";
 import { Eye, Sun, Monitor, Phone, Star, Shield, Truck, ArrowRight, Sparkles, TrendingUp, Users, Award } from 'lucide-react';
@@ -19,16 +20,11 @@ const Home = ({ addToCart, addToWishlist }) => {
       try {
         setIsLoading(true);
         setError(null);
-  let url = "http://localhost:4000/api/products?";
-        if (category) url += `category=${category}&`;
-        if (search) url += `search=${search}&`;
-        url += `limit=500`; // increase the number of products returned on Home
-
-        const response = await fetch(url);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
+        const params = {};
+        if (category) params.category = category;
+        if (search) params.search = search;
+        params.limit = 500; // increase the number of products returned on Home
+        const { data } = await api.get('/products', { params });
         setProducts(Array.isArray(data) ? data : data.products || []);
       } catch (err) {
         console.error("Error fetching products:", err);
@@ -48,7 +44,7 @@ const Home = ({ addToCart, addToWishlist }) => {
   const categories = [
     { icon: Eye, name: "Eyeglasses", image: "https://res.cloudinary.com/dfhjtmvrz/image/upload/v1762757250/eyeglass_fuwwlt.webp", link: "/category/Eyeglasses", color: "bg-blue-50" },
     { icon: Sun, name: "Sunglasses", image: "https://res.cloudinary.com/dfhjtmvrz/image/upload/v1762756833/sunglasses_x1svz3.jpg", link: "/category/Sunglasses", color: "bg-amber-50" },
-    { icon: Monitor, name: "Computer Glasses", image: "https://res.cloudinary.com/dfhjtmvrz/image/upload/v1762757347/computer_awjoxt.webp", link: "/category/Computer%20Glasses", color: "bg-green-50" },
+    { icon: Monitor, name: "Computer Glasses", image: "https://res.cloudinary.com/dfhjtmvrz/image/upload/v1763573363/computer_snzcg9.webp", link: "/category/Computer%20Glasses", color: "bg-green-50" },
     { icon: Phone, name: "Contact Lenses", image: "https://res.cloudinary.com/dfhjtmvrz/image/upload/v1762756967/Contact_lenses_gncbmy.webp", link: "/category/Contact%20Lenses", color: "bg-purple-50" }
   ];
 
@@ -66,28 +62,28 @@ const Home = ({ addToCart, addToWishlist }) => {
   return (
     <div className="space-y-0">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-sky-900 via-indigo-900 to-purple-900 text-white overflow-hidden">
+      <section className="relative bg-gradient-to-br from-sky-900 via-indigo-900 to-purple-900 text-white overflow-hidden min-h-[60vh] sm:min-h-[70vh]">
         {/* Animated background elements */}
         <div className="absolute inset-0">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-          <div className="absolute top-40 right-10 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse animation-delay-2000"></div>
-          <div className="absolute bottom-20 left-1/2 w-80 h-80 bg-indigo-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse animation-delay-4000"></div>
+          <div className="hidden sm:block absolute top-20 left-10 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
+          <div className="hidden sm:block absolute top-40 right-10 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse animation-delay-2000"></div>
+          <div className="hidden sm:block absolute bottom-20 left-1/2 w-80 h-80 bg-indigo-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse animation-delay-4000"></div>
         </div>
         
-        <div className="relative max-w-7xl mx-auto px-6 py-24 lg:py-32">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16 lg:py-32">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             <div className="space-y-8">
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm font-medium">
                 <Sparkles className="w-4 h-4" />
                 New Collection 2024
               </div>
-              <h1 className="text-5xl lg:text-6xl font-bold leading-tight">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
                 Find Your Perfect <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-purple-400">Vision</span>
               </h1>
-              <p className="text-xl text-gray-300 leading-relaxed">
+              <p className="text-base sm:text-lg md:text-xl text-gray-300 leading-relaxed">
                 Discover our collection of premium eyewear. Style meets comfort in every frame.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                 <Link 
                   to="/shop" 
                   className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-sky-600 to-indigo-600 text-white rounded-xl font-semibold hover:from-sky-700 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 shadow-lg"
@@ -104,7 +100,7 @@ const Home = ({ addToCart, addToWishlist }) => {
               </div>
               
               {/* Trust indicators */}
-              <div className="flex items-center gap-8 pt-4">
+              <div className="flex flex-wrap items-center gap-4 sm:gap-8 pt-4">
                 <div className="flex items-center gap-2">
                   <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
                   <span className="text-sm">4.9/5 Rating</span>
@@ -128,7 +124,7 @@ const Home = ({ addToCart, addToWishlist }) => {
                       <img
                         src={poster}
                         alt={`Featured ${index + 1}`}
-                        className="w-full h-64 sm:h-80 object-cover"
+                        className="w-full h-56 sm:h-72 md:h-80 object-cover"
                       />
                     </div>
                   ))}
@@ -145,7 +141,7 @@ const Home = ({ addToCart, addToWishlist }) => {
                       <img 
                         src={poster} 
                         alt={`Featured ${index + 1}`} 
-                        className="w-full h-[450px] object-cover"
+                        className="w-full h-72 md:h-[420px] lg:h-[480px] xl:h-[560px] object-cover"
                       />
                     </div>
                   ))}
@@ -164,26 +160,26 @@ const Home = ({ addToCart, addToWishlist }) => {
       </section>
 
       {/* Categories Section */}
-      <section className="py-20 bg-gradient-to-b from-white to-gray-50">
+      <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-b from-white to-gray-50">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-sky-100 text-sky-700 rounded-full text-sm font-medium mb-4">
               <TrendingUp className="w-4 h-4" />
               Trending Categories
             </div>
-            <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+            <h2 className="text-2xl sm:text-3xl lg:text-5xl font-bold text-gray-900 mb-4">
               Explore Our Collections
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               From classic frames to modern designs, find the perfect eyewear for every occasion
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
             {categories.map((cat, i) => (
               <Link 
                 key={i}
                 to={cat.link}
-                className={`group relative ${cat.color} rounded-2xl p-8 transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 overflow-hidden`}
+                className={`group relative ${cat.color} rounded-2xl p-5 sm:p-6 lg:p-8 transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 overflow-hidden`}
               >
                 {/* Background pattern */}
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-500">
@@ -202,7 +198,7 @@ const Home = ({ addToCart, addToWishlist }) => {
                     <img 
                       src={cat.image} 
                       alt={cat.name}
-                      className="w-full h-48 object-cover rounded-xl shadow-md group-hover:scale-105 transition-transform duration-500" 
+                      className="w-full h-36 sm:h-44 md:h-48 object-cover rounded-xl shadow-md group-hover:scale-105 transition-transform duration-500" 
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   </div>
@@ -218,7 +214,7 @@ const Home = ({ addToCart, addToWishlist }) => {
       </section>
 
       {/* Featured Products */}
-      <section className="py-20 bg-white">
+      <section className="py-12 sm:py-16 lg:py-20 bg-white">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-full text-sm font-medium mb-4">
@@ -260,7 +256,7 @@ const Home = ({ addToCart, addToWishlist }) => {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 ">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 ">
                 {products.slice(0, 6).map((product) => (
                   <ProductCard
                     key={product._id}
@@ -285,10 +281,10 @@ const Home = ({ addToCart, addToWishlist }) => {
       </section>
 
       {/* Contact Lenses Section */}
-      <section className="py-20 bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50">
+      <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50">
         <div className="max-w-7xl mx-auto px-6">
           <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-3xl overflow-hidden shadow-2xl">
-            <div className="grid lg:grid-cols-2 gap-12 items-center p-12 lg:p-16">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center p-6 sm:p-10 lg:p-16">
               <div className="space-y-8">
                 <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm text-white rounded-full text-sm font-medium">
                   <Phone className="w-4 h-4" />
@@ -331,7 +327,7 @@ const Home = ({ addToCart, addToWishlist }) => {
                       <img
                         src={img}
                         alt={`Contact Lens ${i + 1}`}
-                        className="w-full h-56 object-cover group-hover:scale-110 transition-transform duration-500"
+                        className="w-full h-44 sm:h-56 md:h-64 object-cover group-hover:scale-110 transition-transform duration-500"
                       />
                     </div>
                     <div className="absolute -top-2 -right-2 bg-yellow-400 text-gray-900 px-3 py-1 rounded-full text-sm font-bold">
@@ -383,11 +379,11 @@ const Home = ({ addToCart, addToWishlist }) => {
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 bg-gradient-to-r from-sky-600 to-indigo-600">
+      <section className="py-12 sm:py-16 bg-gradient-to-r from-sky-600 to-indigo-600">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center text-white">
             <div>
-              <div className="text-4xl lg:text-5xl font-bold mb-2">100k+</div>
+              <div className="text-2xl sm:text-3xl lg:text-5xl font-bold mb-2">100k+</div>
               <div className="text-sky-100">Happy Customers</div>
             </div>
             <div>

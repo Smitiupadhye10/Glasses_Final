@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
+import api from "../api/axios";
 
 export default function ProductsByCategory() {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:4000/api/products")
-      .then((res) => res.json())
-      .then((data) => setProducts(data));
+    api.get('/products')
+      .then(({ data }) => setProducts(Array.isArray(data) ? data : data.products || []))
+      .catch(() => setProducts([]));
   }, []);
 
   // Group products by their category
@@ -30,9 +31,9 @@ export default function ProductsByCategory() {
                 className="bg-white rounded-lg shadow p-4 flex flex-col items-center hover:shadow-lg transition-shadow duration-300"
               >
                 <img
-                  src={product.images?.image1 || product.Images?.image1 || 'https://via.placeholder.com/150x80?text=No+Image'}
+                  src={product.images?.image1 || product.Images?.image1 || 'https://via.placeholder.com/300x200?text=No+Image'}
                   alt={product.title}
-                  className="h-32 object-contain mb-2 rounded"
+                  className="w-full h-28 sm:h-36 md:h-40 object-contain mb-2 rounded bg-gray-50"
                 />
                 <div className="font-semibold text-center mb-1">{product.title}</div>
                 <div className="text-xs text-gray-600 text-center mb-2">{product.description}</div>

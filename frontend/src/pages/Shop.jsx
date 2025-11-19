@@ -136,8 +136,8 @@ const Shop = ({ addToCart, addToWishlist }) => {
   };
 
   return (
-    <section className="max-w-7xl mx-auto px-6 py-10">
-      <h1 className="text-4xl font-bold mb-10 text-center text-gray-900">
+    <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
+      <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-8 sm:mb-10 text-center text-gray-900">
         All Products
       </h1>
 
@@ -160,7 +160,7 @@ const Shop = ({ addToCart, addToWishlist }) => {
                 </h2>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
                 {products.map((product) => (
                   <ProductCard
                     key={product._id}

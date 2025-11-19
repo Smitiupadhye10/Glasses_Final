@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
+import api from "../api/axios";
 
 const PRICE_RANGES = [
   "300-1000",
@@ -41,22 +42,19 @@ export default function CategoryPage({ addToCart, addToWishlist }) {
     params.set("page", String(page));
     params.set("limit", String(limit));
 
-    const url = `${import.meta.env.VITE_API_BASE_URL}/products?${params.toString()}`;
-
-
-
-    const fadeTimeout = setTimeout(() => {
-      fetch(url)
-        .then((res) => res.json())
-        .then((data) => {
-          setProducts(Array.isArray(data.products) ? data.products : []);
-          setPagination(
-            data.pagination || { currentPage: page, totalPages: 0, totalProducts: 0, productsPerPage: limit }
-          );
-          setTimeout(() => setVisible(true), 80);
-        })
-        .catch((err) => setError(err.message))
-        .finally(() => setLoading(false));
+    const fadeTimeout = setTimeout(async () => {
+      try {
+        const { data } = await api.get('/products', { params: Object.fromEntries(params) });
+        setProducts(Array.isArray(data.products) ? data.products : []);
+        setPagination(
+          data.pagination || { currentPage: page, totalPages: 0, totalProducts: 0, productsPerPage: limit }
+        );
+        setTimeout(() => setVisible(true), 80);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
     }, 80);
 
     // Fetch facets (exclude page/limit to avoid affecting counts)
@@ -64,10 +62,8 @@ export default function CategoryPage({ addToCart, addToWishlist }) {
     if (category) facetParams.set("category", category);
     facetParams.delete("page");
     facetParams.delete("limit");
-    fetch(`${import.meta.env.VITE_API_BASE_URL}/products/facets?${facetParams.toString()}`)
-
-      .then((r) => r.json())
-      .then((f) => setFacets({
+    api.get('/products/facets', { params: Object.fromEntries(facetParams) })
+      .then(({ data: f }) => setFacets({
         priceBuckets: f?.priceBuckets || {},
         genders: f?.genders || {},
         colors: f?.colors || {},

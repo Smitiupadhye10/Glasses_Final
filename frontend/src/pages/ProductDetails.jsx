@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { CartContext } from "../context/CartContext.jsx";
+import api from "../api/axios";
 import { Heart, X, Star, ArrowLeft, ChevronLeft, ChevronRight, ShoppingCart } from "lucide-react";
 
 // Normalize gender labels
@@ -36,9 +37,7 @@ const ProductDetails = () => {
     const fetchProduct = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`http://localhost:4000/api/products/${id}`);
-        if (!res.ok) throw new Error("Product not found");
-        const data = await res.json();
+        const { data } = await api.get(`/products/${id}`);
         setProduct(data);
 
         if (data.product_info?.powerOptions?.length > 0) {
@@ -171,7 +170,7 @@ const ProductDetails = () => {
               {/* Image Carousel */}
               <div className="relative mb-4">
                 {/* Main Image Container */}
-                <div className="relative w-full h-96 bg-gray-50 rounded-xl overflow-hidden group">
+                <div className="relative w-full h-64 sm:h-80 md:h-96 bg-gray-50 rounded-xl overflow-hidden group">
                   <img
                     src={selectedImage}
                     alt={product.title}
@@ -184,14 +183,14 @@ const ProductDetails = () => {
                     <>
                       <button
                         onClick={prevImage}
-                        className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-sm p-2 rounded-full shadow-lg hover:bg-white transition-all duration-200 opacity-0 group-hover:opacity-100"
+                        className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-sm p-2 rounded-full shadow-lg hover:bg-white transition-all duration-200 opacity-0 group-hover:opacity-100"
                         aria-label="Previous image"
                       >
                         <ChevronLeft className="w-6 h-6 text-gray-700" />
                       </button>
                       <button
                         onClick={nextImage}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-sm p-2 rounded-full shadow-lg hover:bg-white transition-all duration-200 opacity-0 group-hover:opacity-100"
+                        className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-sm p-2 rounded-full shadow-lg hover:bg-white transition-all duration-200 opacity-0 group-hover:opacity-100"
                         aria-label="Next image"
                       >
                         <ChevronRight className="w-6 h-6 text-gray-700" />
@@ -214,7 +213,7 @@ const ProductDetails = () => {
                       <button
                         key={i}
                         onClick={() => setSelectedImageIndex(i)}
-                        className={`flex-shrink-0 w-20 h-20 p-1 rounded-lg border-2 transition-all duration-200 ${
+                        className={`flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 p-1 rounded-lg border-2 transition-all duration-200 ${
                           selectedImageIndex === i
                             ? "border-indigo-600 shadow-md scale-105"
                             : "border-gray-200 hover:border-indigo-300"
